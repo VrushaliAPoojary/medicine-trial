@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import {Router} from '@angular/router';
+import { Router } from '@angular/router';
 import Web3 from 'web3';
 import { endPoint, LOGIN } from '../../constants/api-constants';
+import { AuthService } from '../../auth.service';  // ✅ Import AuthService
 
 @Component({
   selector: 'app-login',
@@ -13,7 +14,11 @@ export class LoginComponent {
   web3: Web3 | undefined;
   userAddress: string | null = null;
 
-  constructor(private http: HttpClient, private router: Router) {  
+  constructor(
+    private http: HttpClient, 
+    private router: Router, 
+    private authService: AuthService  // ✅ Inject AuthService
+  ) {  
     this.initWeb3();
   }
 
@@ -46,13 +51,13 @@ export class LoginComponent {
     }
   
     const apiUrl = `${endPoint}${LOGIN}`;
-    const userData = { user_address: this.userAddress };  // ✅ Use correct key
-  
+    const userData = { user_address: this.userAddress };  
+
     this.http.post<{ user_address: string; role: string; success: boolean }>(apiUrl, userData)
       .subscribe({
         next: (response) => {
-          if (response.success) {  // ✅ Check success flag
-            document.cookie = `user_address=${response.user_address}; path=/`;  // ✅ Set cookie
+          if (response.success) {  
+            this.authService.setUserAddress(response.user_address,response.role); 
             alert('Login successful!');  
             this.router.navigate(['/']); 
           } else {
@@ -65,5 +70,4 @@ export class LoginComponent {
         }
       });
   }
-  
 }

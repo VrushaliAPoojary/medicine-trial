@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { UtilitiesBorderComponent } from './utilities-border.component';
+import { FooterComponent } from './footer.component';
 
-describe('UtilitiesBorderComponent', () => {
-  let component: UtilitiesBorderComponent;
-  let fixture: ComponentFixture<UtilitiesBorderComponent>;
+describe('FooterComponent', () => {
+  let component: FooterComponent;
+  let fixture: ComponentFixture<FooterComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [UtilitiesBorderComponent]
+      imports: [FooterComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(UtilitiesBorderComponent);
+    fixture = TestBed.createComponent(FooterComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

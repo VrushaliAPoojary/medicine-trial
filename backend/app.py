@@ -34,9 +34,9 @@ with open('./artifacts/contracts/ProductRegistry.sol/ProductRegistry.json') as f
 with open('./artifacts/contracts/TrialManager.sol/TrialManager.json') as f:
     trial = json.load(f)
 
-RBAC_ADDRESS = "0xeD9D3CC8a062394BC3157b8ca7a76638A457Ce28"
-PRODUCT_ADDRESS = "0x9793db790c286CF8AcA9d2B4295FDa0dEc1Af58F"
-TRIAL_ADDRESS = "0xA6EC2E5ABE7604DdeDf1c43222806237748C3a2A"
+RBAC_ADDRESS = "0x188f62f9Db178CE39C683eA9b3a7b26081BF4139"
+PRODUCT_ADDRESS = "0x22FFb296507751759eDe9a3108e14CC21c0b62ae"
+TRIAL_ADDRESS = "0x04Ca43FB8bac4cd63BA4aE12d65E0086F4828912"
 
 rbac_contract = w3.eth.contract(address=RBAC_ADDRESS, abi=rbac['abi'])
 product_contract = w3.eth.contract(address=PRODUCT_ADDRESS, abi=product['abi'])
@@ -158,6 +158,7 @@ async def approve_role(data: ApproveRoleSchema):
         logger.error(f"Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.get("/api/v1/role-request/{user_address}")
 async def get_pending_request(user_address: str):
     """ Get pending role request """
@@ -172,6 +173,37 @@ async def get_pending_request(user_address: str):
     except Exception as e:
         logger.error(f"Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/v1/getname/{role}")
+async def get_users_by_role(role: str):
+    """Fetch users by role"""
+    try:
+        if role.lower() not in ROLE_MAPPING:
+            raise HTTPException(status_code=400, detail="Invalid role")
+
+        role_id = ROLE_MAPPING[role.lower()]
+        users = rbac_contract.functions.getUsersByRole(role_id).call()
+        return {"role": role, "users": users}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/v1/pending-requests")
+async def get_pending_requests():
+    """ Fetch all pending role requests """
+    try:
+        users, requested_roles = rbac_contract.functions.getAllRoleRequests().call()
+
+        role_requests = [
+            {"user": users[i], "requestedRole": requested_roles[i]}
+            for i in range(len(users))
+        ]
+        return {"pendingRequests": role_requests}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 ### ------------------------- PRODUCT ROUTES ------------------------- ###
 
